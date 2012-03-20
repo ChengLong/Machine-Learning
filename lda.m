@@ -112,7 +112,7 @@ end
 S_between_class = zeros(dim_of_img);
 %since each class has exactly the same number of training images, the mean of the mean of each class will be the mean of all training data
 S_between_class =  num_of_training * cov(mean_of_all_class);
- 
+
 % it can be shown that the optimal projection matrix W_optimal is the one whose columns are the first (C-1) leading eigenvectors of inv(S_within_class)*S_between_class
 S_inv_w_b = inv(S_within_class) * S_between_class;
 
@@ -130,7 +130,7 @@ end
 
 
 % 5. Classification: KNN Nearest Neighbor
-
+disp('5. Classification using KNN');
 correct = 0;
 totalTesting = 0;
 
@@ -149,7 +149,7 @@ for i=1:40
 	res = shrinkImg(img, rs);
         s = size(res);
         testing.image = W_optimal * double(reshape(res, s(1)*s(2), 1));
-        
+
 	% knn
         % 1-distance 2-label
         candidates = [];
@@ -162,17 +162,18 @@ for i=1:40
         maxLabel = 40;
         labels = zeros(1, maxLabel, "uint8");
         for k=1:kValue
-            labels( candidates(k,2) )++;
+            labels( candidates(k,2) )++;%vote
         end
         res = 0;
-        max=0;
-        for k=1:maxLabel
-            if labels(k)>max,
-                max=labels(k);
-                res = k;
+        maxVotes=0;
+        for k=1:kValue % check at most kValue position in the row vector
+            if labels(candidates(k,2)) > maxVotes,
+                maxVotes=labels(candidates(k,2));
+                res = candidates(k,2);
             end
         end
-        printf('>>  testing %3d **  predicted: %4d  real: %4d\n', totalTesting, res, testing.label);
+        printf('>>  testing %3d **  predicted: %4d(votes=%d) real: %4d\n', totalTesting, res, maxVotes, testing.label);
+
         if res == testing.label,
             correct++;
         end
