@@ -92,7 +92,7 @@ disp('3. Dimensinality Reduction...')
 
 % calculate within class scatter Sw = Sigma(Si)
 num_of_training=10-fold;
-dim_of_img = length(LdaImageDb(1).image);
+dim_of_img = rows(LdaImageDb(1).image);
 S_within_class = zeros(dim_of_img);
 mean_of_all_class = []; % each row is the mean of a class
 for i=1:40
@@ -104,15 +104,14 @@ for i=1:40
 	end
 	mean_of_all_class = [mean_of_all_class; mean(each_class)];
 
-	%calculate covariance matrix, normalize with N. the default cov will normalize with N-1
-	cov_matrix = ((num_of_training-1)/num_of_training) * cov(double(each_class));
-	S_within_class = S_within_class + cov_matrix;
+	%calculate covariance matrix, 
+	S_within_class = S_within_class + cov(double(each_class));
 end
 
 %calculate between-class scatter using mean_of_all_class
 S_between_class = zeros(dim_of_img);
 %since each class has exactly the same number of training images, the mean of the mean of each class will be the mean of all training data
-S_between_class =  (39/40) * cov(mean_of_all_class);
+S_between_class =  num_of_training * cov(mean_of_all_class);
  
 % it can be shown that the optimal projection matrix W_optimal is the one whose columns are the first (C-1) leading eigenvectors of inv(S_within_class)*S_between_class
 S_inv_w_b = inv(S_within_class) * S_between_class;
