@@ -18,10 +18,10 @@ endfunction
 function leading_eig = findLeadingEigV( A, m )
 	k=size(A,1); % assume A is square
 	[V,D]=eig(A); 
-	[S,I]=sort(diag(D)); 
+	[S,I]=sort(diag(D), 'descend'); %sort in descending order
 	leading_eig = [];
 	for i=1:m
-		leading_eig = [leading_eig,V(:,I(k-i+1))];
+		leading_eig = [leading_eig,V(:,I(i))];
 	endfor
 endfunction
 
