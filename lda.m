@@ -14,15 +14,20 @@ function res = SquareEuc(r1, r2)
     endfor
 endfunction
 
-%function to compute the first m leading eigenvectors of a matrix
+%function to compute the first m leading eigenvectors of matrix A 
 function leading_eig = findLeadingEigV( A, m )
-	k=size(A,1); % assume A is square
 	[V,D]=eig(A); 
 	[S,I]=sort(diag(D), 'descend'); %sort in descending order
 	leading_eig = [];
 	for i=1:m
 		leading_eig = [leading_eig,V(:,I(i))];
 	endfor
+endfunction
+
+% function to first normalize the input img to double format with value 0 to 1.0 and then perform histogram transformation
+function histedImg = hisEqualize(img)
+	doubleImg = im2double(img);
+	histedImg = histeq(doubleImg, 256);
 endfunction
 
 % 0. Initialization
@@ -73,6 +78,7 @@ if ( ~exist('LdaImageDb.data', "file") ) % if not exists
 		    
 		    % shrink img size. the original img size is too big for processing
 		    res = shrinkImg(img, rs);
+		    res = hisEqualize(res); % histogram equalization
 		    %convert 2D image to 1D   
 		    s=size(res);
 		    LdaImageDb(index).image = reshape( res, s(1)*s(2), 1) ;
@@ -106,7 +112,7 @@ else %compute it and save for next time
 		mean_of_all_class = [mean_of_all_class; mean(each_class)];
 
 		%calculate covariance matrix, 
-		S_within_class = S_within_class + cov(double(each_class));
+		S_within_class = S_within_class + cov(each_class);
 	endfor
 
 	%calculate between-class scatter using mean_of_all_class
@@ -132,7 +138,7 @@ if (exist('faceDb.data', "file") ),
 else
 	for i=1:length(LdaImageDb),
 	    faceDb(i).label = LdaImageDb(i).label;
-	    faceDb(i).image = W_optimal * double(LdaImageDb(i).image);
+	    faceDb(i).image = W_optimal * LdaImageDb(i).image;
 	endfor
 	save -binary faceDb.data faceDb;
 endif
@@ -155,8 +161,9 @@ for i=1:40
         
         % shrink img size accroding to requirement
 	res = shrinkImg(img, rs);
+	res = hisEqualize(res);
         s = size(res);
-        testing.image = W_optimal * double(reshape(res, s(1)*s(2), 1));
+        testing.image = W_optimal * reshape(res, s(1)*s(2), 1);
 
 	% knn
         % 1-distance 2-label
