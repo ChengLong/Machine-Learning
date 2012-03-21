@@ -1,34 +1,4 @@
-
-% shrink image size according to requirment
-function shrinkedImg = shrinkImg (img, rs)
-	[r,c]=size(img);
-	shrinkedImg = img(1:rs:r , 1:rs:c );
-endfunction
-
-% function to compute the square of euclidean distance between r1 and r2
-function res = SquareEuc(r1, r2)
-    len = length(r1);
-    res = 0;
-    for i=1:len
-        res += (r1(i)-r2(i))^2;
-    endfor
-endfunction
-
-%function to compute the first m leading eigenvectors of matrix A 
-function leading_eig = findLeadingEigV( A, m )
-	[V,D]=eig(A); 
-	[S,I]=sort(diag(D), 'descend'); %sort in descending order
-	leading_eig = [];
-	for i=1:m
-		leading_eig = [leading_eig,V(:,I(i))];
-	endfor
-endfunction
-
-% function to first normalize the input img to double format with value 0 to 1.0 and then perform histogram transformation
-function histedImg = hisEqualize(img)
-	doubleImg = im2double(img);
-	histedImg = histeq(doubleImg, 256);
-endfunction
+addpath('tools');
 
 % 0. Initialization
 
@@ -75,7 +45,6 @@ if ( ~exist('LdaImageDb.data', "file") ) % if not exists
 			maxLabel=i;
 		    endif
 		    img = imread( strcat( folderName, '/', subdir(j+2).name ) );
-		    
 		    % shrink img size. the original img size is too big for processing
 		    res = shrinkImg(img, rs);
 		    res = hisEqualize(res); % histogram equalization
@@ -114,7 +83,6 @@ else %compute it and save for next time
 		%calculate covariance matrix, 
 		S_within_class = S_within_class + cov(each_class);
 	endfor
-
 	%calculate between-class scatter using mean_of_all_class
 	S_between_class = zeros(dim_of_img);
 	%since each class has exactly the same # training images, the mean of the mean of each class will be the mean of all training data
@@ -169,7 +137,8 @@ for i=1:40
         % 1-distance 2-label
         candidates = [];
         for k=1:length(faceDb),
-            candidates(k,1) = SquareEuc(testing.image, faceDb(k).image);
+	    % calculate norm
+            candidates(k,1) = norm(testing.image - faceDb(k).image, 2); 
             candidates(k,2) = faceDb(k).label;
         endfor
 
