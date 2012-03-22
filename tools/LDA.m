@@ -29,7 +29,7 @@ function W_optimal = LDA(fold, LdaImageDb)
 
 		% it can be shown that the optimal projection matrix W_optimal is the one whose columns are the first (C-1) leading 
 		%eigenvectors of inv(S_within_class)*S_between_class
-		S_inv_w_b = inv(S_within_class) * S_between_class;
+		S_inv_w_b = pinv(S_within_class) * S_between_class;
 
 		%get the first C-1 = 39 eigenvectors 
 		W_optimal = findLeadingEigV(S_inv_w_b, 39);
